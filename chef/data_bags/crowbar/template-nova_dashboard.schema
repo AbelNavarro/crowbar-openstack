@@ -2,7 +2,7 @@
   "type": "map",
   "required": true,
   "mapping": {
-    "id": { "type": "str", "required": true, "pattern": "/^bc-nova_dashboard-|^bc-template-nova_dashboard$/" },
+    "id": { "type": "str", "required": true, "pattern": "/^nova_dashboard-|^template-nova_dashboard$/" },
     "description": { "type": "str", "required": true },
     "attributes": {
       "type": "map",

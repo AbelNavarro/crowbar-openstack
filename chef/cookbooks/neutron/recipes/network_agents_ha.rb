@@ -274,7 +274,7 @@ if use_l3_agent
     # constraint on these services, but it's optional, not mandatory (because it
     # doesn't need to be restarted when postgresql or rabbitmq are restarted).
     # So explicitly depend on postgresql and rabbitmq (if they are in the cluster).
-    ordering "( postgresql rabbitmq g-haproxy cl-neutron-server #{agents_clone_name} ) #{ha_service_primitive_name}"
+    ordering "( postgresql rabbitmq g-haproxy cl-neutron-server #{l3_agent_clone} ) #{ha_service_primitive_name}"
     score "Mandatory"
     action :create
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }

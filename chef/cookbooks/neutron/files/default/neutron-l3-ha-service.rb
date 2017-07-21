@@ -333,7 +333,7 @@ class HATool
     subprocess = Subprocess.new @options.program, '--help'
     subprocess.env.merge! @options.env
     subprocess.start
-    result = subprocess.wait 1
+    result = subprocess.wait @options.timeout
     if result.exit_status != 0
       raise RunningHelpFailed
     end
@@ -399,11 +399,13 @@ end
 class HAToolOptions
   attr_reader :program
   attr_reader :env
+  attr_reader :timeout
   attr_reader :insecure
 
-  def initialize(program, env, insecure)
+  def initialize(program, env, timeout, insecure)
     @program = program
     @env = env
+    @timeout = timeout.to_i
     @insecure = insecure
   end
 
@@ -412,7 +414,7 @@ class HAToolOptions
   end
 
   def self.from_hash(hash)
-    HAToolOptions.new hash['program'], hash['env'], to_bool(hash['insecure'])
+    HAToolOptions.new hash['program'], hash['env'], hash['timeout'], to_bool(hash['insecure'])
   end
 end
 

@@ -34,8 +34,6 @@ def main
     if status.exit_status == 2
       error_counter.reset!
 
-      register_errors_to(error_counter, ha_functions.replicate_dhcp_servers)
-
       register_errors_to(
         error_counter,
         terminator.dont_exit_until_block_finished do
@@ -111,14 +109,6 @@ class HAFunctions
     run_supervised(
       @hatool.migration_command,
       @service_options.router_migration_timeout
-    )
-  end
-
-  def replicate_dhcp_servers
-    $LOG.info('replicating DHCP servers')
-    run_supervised(
-      @hatool.replicate_dhcp_command,
-      @service_options.dhcp_replication_timeout
     )
   end
 
@@ -235,15 +225,13 @@ end
 
 class ServiceOptions
   attr_reader :status_timeout
-  attr_reader :dhcp_replication_timeout
   attr_reader :router_migration_timeout
   attr_reader :hatool
   attr_reader :seconds_to_sleep_between_checks
   attr_reader :max_errors_tolerated
 
-  def initialize(status_timeout, dhcp_replication_timeout, router_migration_timeout, hatool_options, sleep_time, max_errors_tolerated)
+  def initialize(status_timeout, router_migration_timeout, hatool_options, sleep_time, max_errors_tolerated)
     @status_timeout = status_timeout
-    @dhcp_replication_timeout = dhcp_replication_timeout
     @router_migration_timeout = router_migration_timeout
     @hatool = hatool_options
     @seconds_to_sleep_between_checks = sleep_time
@@ -255,7 +243,6 @@ class ServiceOptions
       data = YAML.load file.read
       ServiceOptions.new(
         TimeoutOptions.from_hash(data['timeouts']['status']),
-        TimeoutOptions.from_hash(data['timeouts']['dhcp_replication']),
         TimeoutOptions.from_hash(data['timeouts']['router_migration']),
         HAToolOptions.from_hash(data['hatool']),
         data['seconds_to_sleep_between_checks'].to_i,
@@ -356,10 +343,6 @@ class HATool
 
   def status_command
     return [@options.program, '--l3-agent-check', '--quiet']
-  end
-
-  def replicate_dhcp_command
-    return [@options.program, '--replicate-dhcp'] + @extra_flags + insecure_flag
   end
 
   def migration_command

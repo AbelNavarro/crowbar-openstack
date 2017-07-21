@@ -74,10 +74,6 @@ describe ServiceOptions do
               'terminate' => 1,
               'kill' => 2
             },
-            'dhcp_replication' => {
-              'terminate' => 3,
-              'kill' => 4
-            },
             'router_migration' => {
               'terminate' => 5,
               'kill' => 6
@@ -101,12 +97,6 @@ describe ServiceOptions do
       service_options = ServiceOptions.load(@tmpdir.path_for('settings.yml'))
       expect(service_options.status_timeout.terminate).to eq 1
       expect(service_options.status_timeout.kill).to eq 2
-    end
-
-    it 'loads dhcp replication timeout' do
-      service_options = ServiceOptions.load(@tmpdir.path_for('settings.yml'))
-      expect(service_options.dhcp_replication_timeout.terminate).to eq 3
-      expect(service_options.dhcp_replication_timeout.kill).to eq 4
     end
 
     it 'loads router migration timeouts' do
@@ -424,14 +414,6 @@ describe HATool do
       expect(hatool.status_command).to eq expected
     end
 
-    it 'includes extra_flags for dhcp replication' do
-      hatool = HATool.new @options
-      hatool.extra_flags.push 'extra'
-
-      expected = ['hatool', '--replicate-dhcp', 'extra']
-      expect(hatool.replicate_dhcp_command).to eq expected
-    end
-
     it 'includes extra_flags for agent migration' do
       hatool = HATool.new @options
       hatool.extra_flags.push 'extra'
@@ -444,12 +426,6 @@ describe HATool do
   context 'insecure flag is true' do
     before do
       @options = HAToolOptions.new('hatool', {}, true)
-    end
-
-    it 'includes --insecure for dhcp replication' do
-      hatool = HATool.new @options
-
-      expect(hatool.replicate_dhcp_command).to include '--insecure'
     end
 
     it 'includes --insecure for agent migration' do
@@ -594,10 +570,6 @@ def make_config tmpdir
       'status' => {
         'terminate' => 1,
         'kill' => 2
-      },
-      'dhcp_replication' => {
-        'terminate' => 3,
-        'kill' => 4
       },
       'router_migration' => {
         'terminate' => 5,

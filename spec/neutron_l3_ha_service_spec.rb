@@ -647,8 +647,8 @@ describe 'neutron-l3-ha-service' do
 
         @settings_path = make_config tmpdir
         @tmpdir = tmpdir
-        @ruby = File.join(RbConfig::CONFIG['bindir'], RbConfig::CONFIG['ruby_install_name'])
-        @service_path = 'chef/cookbooks/neutron/files/default/neutron-l3-ha-service.rb'
+        @ruby = File.join(RbConfig::CONFIG["bindir"], RbConfig::CONFIG["ruby_install_name"])
+        @service_path = "chef/cookbooks/neutron/files/default/neutron-l3-ha-service.rb"
         example.run
       end
     end

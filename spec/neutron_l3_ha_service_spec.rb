@@ -328,7 +328,7 @@ end
 describe HATool do
   context 'insecure flag is false' do
     before do
-      @ha_tool = HATool.new(HAToolOptions.new('hatool', {}, false))
+      @ha_tool = HATool.new(HAToolOptions.new('hatool', {}, 60, false))
     end
 
     describe '#get_help' do
@@ -339,7 +339,7 @@ describe HATool do
         allow(subprocess).to receive(:start)
         allow(subprocess).to receive(:env) {env}
         allow(env).to receive(:merge!)
-        expect(subprocess).to receive(:wait).with(1) { RunResult.new 'out', 'err', 0 }
+        expect(subprocess).to receive(:wait).with(60) { RunResult.new 'out', 'err', 0 }
 
         @ha_tool.get_help
       end
@@ -351,7 +351,7 @@ describe HATool do
         allow(subprocess).to receive(:start)
         allow(subprocess).to receive(:env) {env}
         allow(env).to receive(:merge!)
-        allow(subprocess).to receive(:wait).with(1) { RunResult.new 'out', 'err', 0 }
+        allow(subprocess).to receive(:wait).with(60) { RunResult.new 'out', 'err', 0 }
 
         result = @ha_tool.get_help
         expect(result).to eq 'out'
@@ -360,7 +360,7 @@ describe HATool do
       it 'raises an error if result is non-zero' do
         subprocess = double
         allow(Subprocess).to receive(:new) { subprocess }
-        allow(subprocess).to receive(:wait).with(1) { RunResult.new 'out', 'err', 1 }
+        allow(subprocess).to receive(:wait).with(60) { RunResult.new 'out', 'err', 1 }
 
         expect { @ha_tool.get_help }.to raise_error
       end
@@ -369,7 +369,7 @@ describe HATool do
 
   context 'insecure flag is false' do
     before do
-      @options = HAToolOptions.new('hatool', {}, false)
+      @options = HAToolOptions.new('hatool', {}, 60, false)
     end
 
     it 'queries hatool with --help' do
@@ -425,7 +425,7 @@ describe HATool do
 
   context 'insecure flag is true' do
     before do
-      @options = HAToolOptions.new('hatool', {}, true)
+      @options = HAToolOptions.new('hatool', {}, 60, true)
     end
 
     it 'includes --insecure for agent migration' do
@@ -579,6 +579,7 @@ def make_config tmpdir
     'hatool' => {
       'program' => @hatool_path,
       'env' => {},
+      'timeout' => 60,
       'insecure' => 'false'
     },
     'seconds_to_sleep_between_checks' => '10',
@@ -619,7 +620,6 @@ describe 'neutron-l3-ha-service' do
 
       expect(result.error).to include 'HATOOL-CALL --help'
       expect(result.error).to include 'HATOOL-CALL --l3-agent-check --quiet'
-      expect(result.error).to include 'HATOOL-CALL --replicate-dhcp --retry'
       expect(result.error).to include 'HATOOL-CALL --l3-agent-migrate --now --retry'
 
       expect(result.exit_status).to eq 0
@@ -672,7 +672,6 @@ describe 'neutron-l3-ha-service' do
 
       expect(error).to include 'HATOOL-CALL --help'
       expect(error).to include 'HATOOL-CALL --l3-agent-check --quiet'
-      expect(error).to include 'HATOOL-CALL --replicate-dhcp'
       expect(error).to include 'HATOOL-CALL --l3-agent-migrate --now'
       expect(error).to include 'HATOOL RECEIVED TERM SIGNAL'
 

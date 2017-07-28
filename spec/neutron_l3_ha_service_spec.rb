@@ -662,7 +662,7 @@ describe 'neutron-l3-ha-service' do
       # Start a subprocess in a new process group (as systemd would do)
       stdin, stdout, stderr, wait_thr = Open3.popen3(@ruby, @service_path, @settings_path, :pgroup => true)
       stdin.close()
-      sleep 1  # Let the script run for a while, so we know it's now sleeping inside l3-agent-migration
+      sleep 5  # Let the script run for a while, so we know it's now sleeping inside l3-agent-migration
 
       Process.kill('TERM', -Process.getpgid(wait_thr.pid))
 

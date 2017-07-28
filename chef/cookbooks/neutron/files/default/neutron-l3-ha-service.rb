@@ -170,7 +170,6 @@ class Subprocess
   attr_reader :env
 
   def initialize *args
-    puts "XXX Subprocess #{__method__}"
     @args = args
     @completed = false
     @env = {}
@@ -179,7 +178,6 @@ class Subprocess
   end
 
   def environment
-    puts "XXX Subprocess #{__method__}"
     Hash[@env.map { |key, val| [key, val.to_s] }]
   end
 

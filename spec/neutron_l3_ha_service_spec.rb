@@ -151,7 +151,7 @@ end
 def sleep_workaround_for_subprocess
   # After starting the subprocess, a small delay has to be added, otherwise
   # the signals will not be received by the created processes for some reason
-  sleep 0.2
+  sleep 1
 end
 
 

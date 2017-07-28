@@ -210,7 +210,6 @@ describe Subprocess do
     around do |example|
       with_tmpdir do |tmpdir|
         tmpdir.write_script 'somescript', <<-EOF
-        puts "XXX - somescript"
         Signal.trap 'TERM' do
           exit 2
         end
@@ -223,19 +222,12 @@ describe Subprocess do
     end
 
     it 'gets 2 as an exit value when term sent to subprocess' do
-      puts "XXX 001"
-      puts "XXX 001 - ruby: #{$RUBY}"
-      puts "XXX 001 - path_to_script: #{@path_to_script}"
       subprocess = Subprocess.new $RUBY, @path_to_script
       subprocess.start
-      puts "XXX 002"
 
       sleep_workaround_for_subprocess
-      puts "XXX 003"
       subprocess.send_signal 'TERM'
-      puts "XXX 004"
       run_result = subprocess.wait 1
-      puts "XXX 005"
 
       expect(run_result.exit_status).to eq 2
     end

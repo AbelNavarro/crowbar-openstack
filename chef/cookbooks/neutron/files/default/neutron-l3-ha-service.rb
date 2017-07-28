@@ -182,7 +182,6 @@ class Subprocess
   end
 
   def start
-    puts "XXX Subprocess #{__method__}"
     stdin, stdout, stderr, @wait_thr = Open3.popen3(environment, *@args)
     @pid = @wait_thr.pid
     @stdout_reader.read stdout, "#{self} stdout:"
@@ -191,7 +190,6 @@ class Subprocess
   end
 
   def wait timeout
-    puts "XXX Subprocess #{__method__}"
     if @completed
       raise AlreadyCompleted
     end
@@ -210,7 +208,6 @@ class Subprocess
   end
 
   def send_signal signal
-    puts "XXX Subprocess #{__method__}"
     begin
       Process.kill(signal, @pid)
     rescue Errno::ESRCH

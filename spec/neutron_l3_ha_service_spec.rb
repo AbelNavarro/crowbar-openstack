@@ -224,6 +224,8 @@ describe Subprocess do
 
     it 'gets 2 as an exit value when term sent to subprocess' do
       puts "XXX 001"
+      puts "XXX 001 - ruby: #{$RUBY}"
+      puts "XXX 001 - path_to_script: #{@path_to_script}"
       subprocess = Subprocess.new $RUBY, @path_to_script
       subprocess.start
       puts "XXX 002"

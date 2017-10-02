@@ -22,10 +22,19 @@ require 'logger'
 class HAToolLog
   def self.log
     if @logger.nil?
-      @logger = Logger.new('/var/log/neutron/neutron-l3-ha-service.log', 'daily')
+      #@logger = Logger.new("/var/log/neutron/neutron-l3-ha-service.log", "daily")
+      @logger = Logger.new("/home/abel/neutron-l3-ha-service.log", "daily")
       @logger.level = Logger::DEBUG
     end
     @logger
+  end
+
+  def self.set_logger(logger)
+    @logger = logger
+  end
+
+  def self.set_level(level)
+    @level = level
   end
 end
 
@@ -153,12 +162,14 @@ class LoggingStreamReader
     @thread = Thread.new do
       stream.each do |line|
         @lines << line
-        HAToolLog.log.info("#{log_msg} #{line}")
+	#puts "XXX line: " + line
+        HAToolLog.log.error("#{log_msg} #{line}")
       end
     end
   end
 
   def content
+    #@lines.each { |line| puts "XXX content line: " + line }
     @lines.join("\n")
   end
 

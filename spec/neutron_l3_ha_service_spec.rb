@@ -33,6 +33,11 @@ class Tmpdir
     File.join(@root_path, basename)
   end
 
+  def create_file(basename)
+    full_path = path_for(basename)
+    File.open(full_path, "w") {}
+  end
+
   def write_file(basename, contents)
     full_path = path_for(basename)
     File.open(full_path, "w") do |script|
@@ -148,54 +153,64 @@ def sleep_workaround_for_subprocess
 end
 
 describe Subprocess do
-  before(:all) do
-    # supress all the log output that pollutes the terminal during tests
-    HAToolLog.log.level = Logger::FATAL
-  end
-  it "exit_status set to the exit code of the subprocess" do
-    subprocess = Subprocess.new ruby_bin, "-e", "exit 1"
+  context "temporary log file" do
+    around do |example|
+      with_tmpdir do |tmpdir|
+        @tmpdir = tmpdir
+        tmpdir.create_file("tmplog")
+	example.run
+      end
+    end
 
-    subprocess.start
-    result = subprocess.wait 1
+    it "exit_status set to the exit code of the subprocess" do
+      # This is set once for all tests
+      HAToolLog.set_logger(Logger.new(@tmpdir.path_for("tmplog")))
+      HAToolLog.set_level(Logger::FATAL)
 
-    expect(result.exit_status).to eq 1
-  end
+      subprocess = Subprocess.new ruby_bin, "-e", "exit 1"
 
-  it "wait raises exception when run times out" do
-    subprocess = Subprocess.new ruby_bin, "-e", "sleep 0.2"
-    subprocess.start
+      subprocess.start
+      result = subprocess.wait 1
 
-    expect { subprocess.wait 0.1 }.to raise_error TimedOut
-  end
+      expect(result.exit_status).to eq 1
+    end
 
-  it "output contains stdout of subprocess", focus: true do
-    subprocess = Subprocess.new ruby_bin, "-e", "puts 'hello'"
-    subprocess.start
-    run_result = subprocess.wait small_delay
+     it "wait raises exception when run times out" do
+      subprocess = Subprocess.new ruby_bin, "-e", "sleep 0.2"
+      subprocess.start
 
-    expect(run_result.output).to include "hello"
-  end
+      expect { subprocess.wait 0.1 }.to raise_error TimedOut
+    end
 
-  it "error contains stderr of subprocess" do
-    subprocess = Subprocess.new ruby_bin, "-e", "STDERR.puts 'hello'"
-    subprocess.start
-    run_result = subprocess.wait small_delay
+    it "output contains stdout of subprocess", focus: true do
+      subprocess = Subprocess.new ruby_bin, "-e", "puts 'hello'"
+      subprocess.start
+      run_result = subprocess.wait small_delay
 
-    expect(run_result.error).to include "hello"
-  end
+      expect(run_result.output).to include "hello"
+    end
 
-  it "raises error when executable not found" do
-    subprocess = Subprocess.new "nonexisting-executable"
+    it "error contains stderr of subprocess" do
+      subprocess = Subprocess.new ruby_bin, "-e", "STDERR.puts 'hello'"
+      subprocess.start
+      run_result = subprocess.wait small_delay
 
-    expect { subprocess.start }.to raise_error
-  end
+      expect(run_result.error).to include "hello"
+    end
 
-  it "raises an error when user waits for an already terminated subprocess" do
-    subprocess = Subprocess.new ruby_bin, "-e", ""
-    subprocess.start
-    subprocess.wait 1
+    it "raises error when executable not found" do
+      subprocess = Subprocess.new "nonexisting-executable"
 
-    expect { subprocess.wait 1 }.to raise_error
+      expect { subprocess.start }.to raise_error
+    end
+
+    it "raises an error when user waits for an already terminated subprocess" do
+      subprocess = Subprocess.new ruby_bin, "-e", ""
+      subprocess.start
+      subprocess.wait 1
+
+      expect { subprocess.wait 1 }.to raise_error
+    end
   end
 
   context "running a subprocess that exits with 2 on term signal" do
@@ -521,13 +536,17 @@ describe "neutron-l3-ha-service" do
 
         @settings_path = make_config tmpdir
         @tmpdir = tmpdir
+	#tmpdir.create_file("tmplog")
         @ruby = File.join(RbConfig::CONFIG["bindir"], RbConfig::CONFIG["ruby_install_name"])
         @service_path = "chef/cookbooks/neutron/files/default/neutron-l3-ha-service.rb"
+      #HAToolLog.set_logger(Logger.new(@tmpdir.path_for("tmplog")))
         example.run
       end
     end
 
     it "performs migration" do
+      #HAToolLog.set_logger(Logger.new(@tmpdir.path_for("tmplog")))
+
       subprocess = Subprocess.new @ruby, @service_path, @settings_path
       subprocess.start
       sleep_workaround_for_subprocess
@@ -535,8 +554,11 @@ describe "neutron-l3-ha-service" do
       subprocess.send_signal "TERM"
       result = subprocess.wait 0.1
 
-      expect(result.error).to include "HATOOL-CALL --l3-agent-check --quiet"
-      expect(result.error).to include "HATOOL-CALL --l3-agent-migrate --now --retry"
+      #puts "XXX result output: " + result.output
+      #puts "XXX result error: " + result.error
+
+      expect(result.output).to include "HATOOL-CALL --l3-agent-check --quiet"
+      expect(result.output).to include "HATOOL-CALL --l3-agent-migrate --now --retry"
 
       expect(result.exit_status).to eq 0
     end
@@ -576,7 +598,7 @@ describe "neutron-l3-ha-service" do
       # and only terminates afterwards.
 
       # Start a subprocess in a new process group (as systemd would do)
-      stdin, _, stderr, wait_thr = Open3.popen3(
+      stdin, stdout, stderr, wait_thr = Open3.popen3(
         @ruby, @service_path, @settings_path, pgroup: true
       )
       stdin.close
@@ -586,11 +608,11 @@ describe "neutron-l3-ha-service" do
       Process.kill("TERM", -Process.getpgid(wait_thr.pid))
 
       exit_status = wait_thr.value
-      error = stderr.read
+      output = stdout.read
 
-      expect(error).to include "HATOOL-CALL --l3-agent-check --quiet"
-      expect(error).to include "HATOOL-CALL --l3-agent-migrate --now --retry"
-      expect(error).to include "HATOOL RECEIVED TERM SIGNAL"
+      expect(output).to include "HATOOL-CALL --l3-agent-check --quiet"
+      expect(output).to include "HATOOL-CALL --l3-agent-migrate --now --retry"
+      expect(output).to include "HATOOL RECEIVED TERM SIGNAL"
 
       expect(exit_status).to eq 0
     end

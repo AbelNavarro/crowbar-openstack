@@ -77,7 +77,7 @@ if node[:database][:ha][:storage][:mode] == "drbd"
 
   openstack_pacemaker_primitive drbd_primitive do
     agent "ocf:linbit:drbd"
-    params drbd_params
+    parameters drbd_params
     op postgres_op
     action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
@@ -104,7 +104,7 @@ end
 
 openstack_pacemaker_primitive fs_primitive do
   agent "ocf:heartbeat:Filesystem"
-  params fs_params
+  parameters fs_params
   op postgres_op
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }

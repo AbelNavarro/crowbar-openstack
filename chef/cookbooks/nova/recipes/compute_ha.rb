@@ -171,7 +171,7 @@ end
 nova_primitive = "nova-compute"
 openstack_pacemaker_primitive nova_primitive do
   agent "ocf:openstack:NovaCompute"
-  params ({
+  parameters ({
     "auth_url"       => internal_auth_url_v2,
     # "region_name"    => keystone_settings["endpoint_region"],
     "endpoint_type"  => "internalURL",
@@ -231,7 +231,7 @@ controller_transaction_objects = []
 evacuate_primitive = "nova-evacuate"
 openstack_pacemaker_primitive evacuate_primitive do
   agent "ocf:openstack:NovaEvacuate"
-  params ({
+  parameters ({
     "auth_url"       => internal_auth_url_v2,
     # "region_name"    => keystone_settings["endpoint_region"],
     "endpoint_type"  => "internalURL",
@@ -272,7 +272,7 @@ end.sort.join(";")
 fence_primitive = "fence-nova"
 openstack_pacemaker_primitive fence_primitive do
   agent "stonith:fence_compute"
-  params ({
+  parameters ({
     "pcmk_host_map"  => hostmap,
     "auth-url"       => internal_auth_url_v2,
     # "region-name"    => keystone_settings["endpoint_region"],

@@ -141,7 +141,7 @@ end
 
 openstack_pacemaker_primitive service_name do
   agent resource_agent
-  params({
+  parameters({
     "enable_creation" => true,
     "wsrep_cluster_address" => cluster_addresses,
     "check_user" => "monitoring",

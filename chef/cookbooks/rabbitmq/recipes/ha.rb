@@ -105,7 +105,7 @@ if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
 
   openstack_pacemaker_primitive drbd_primitive do
     agent "ocf:linbit:drbd"
-    params drbd_params
+    parameters drbd_params
     op rabbitmq_op
     action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
@@ -132,7 +132,7 @@ end
 
 openstack_pacemaker_primitive fs_primitive do
   agent "ocf:heartbeat:Filesystem"
-  params fs_params
+  parameters fs_params
   op rabbitmq_op
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
@@ -241,7 +241,7 @@ service_transaction_objects = []
 
 openstack_pacemaker_primitive admin_vip_primitive do
   agent "ocf:heartbeat:IPaddr2"
-  params ({
+  parameters ({
     "ip" => admin_ip_addr
   })
   op rabbitmq_op
@@ -253,7 +253,7 @@ service_transaction_objects << "pacemaker_primitive[#{admin_vip_primitive}]"
 if node[:rabbitmq][:listen_public]
   openstack_pacemaker_primitive public_vip_primitive do
     agent "ocf:heartbeat:IPaddr2"
-    params ({
+    parameters ({
       "ip" => public_ip_addr
     })
     op rabbitmq_op
@@ -268,7 +268,7 @@ end
 
 openstack_pacemaker_primitive service_name do
   agent agent_name
-  params ({
+  parameters ({
     "nodename" => node[:rabbitmq][:nodename]
   })
   op rabbitmq_op

@@ -51,7 +51,7 @@ transaction_objects = []
 
 openstack_pacemaker_primitive vip_primitive do
   agent "ocf:heartbeat:IPaddr2"
-  params ({
+  parameters ({
     "ip" => ip_addr
   })
   op postgres_op

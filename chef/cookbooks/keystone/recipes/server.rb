@@ -534,7 +534,7 @@ if node[:keystone][:signing][:token_format] == "fernet"
   keystone_fernet_primitive = "keystone-fernet-rotate"
   openstack_pacemaker_primitive keystone_fernet_primitive do
     agent node[:keystone][:ha][:fernet][:agent]
-    params({
+    parameters({
       "target" => "/var/lib/keystone/keystone-fernet-rotate",
       "link" => "/etc/cron.hourly/openstack-keystone-fernet",
       "backup_suffix" => ".orig"

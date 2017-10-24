@@ -16,15 +16,14 @@
 
 define :openstack_pacemaker_primitive,
     agent: nil,
-    params: {},
+    parameters: {},
     op: {},
     action: [] do
   primitive_name = params[:name]
   agent = params[:agent]
+  parameters = params[:parameters]
   op = params[:op]
   action = params[:action]
-
-  fake_params = {}
 
   unless op["monitor"].nil? || op["monitor"]["on-fail"].nil?
     op_defaults = CrowbarPacemakerHelper.op_defaults(node)
@@ -33,7 +32,7 @@ define :openstack_pacemaker_primitive,
 
   pacemaker_primitive primitive_name do
     agent agent
-    params fake_params
+    params parameters
     op op
     action action
   end

@@ -39,7 +39,7 @@ service_name = "rabbitmq"
 openstack_pacemaker_primitive service_name do
   agent agent_name
   # nodename is empty so that we explicitly depend on the config files
-  params ({
+  parameters ({
     "erlang_cookie" => node[:rabbitmq][:erlang_cookie],
     "pid_file" => pid_file,
     "rmq_feature_health_check" => false,

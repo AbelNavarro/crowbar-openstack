@@ -25,7 +25,7 @@ define :openstack_pacemaker_primitive,
   op = params[:op]
   action = params[:action]
 
-  log "XXX"
+  log "XXX #{op.inspect}"
 
   unless op["monitor"].nil? || op["monitor"]["on-fail"].nil?
     op_defaults = CrowbarPacemakerHelper.op_defaults(node)

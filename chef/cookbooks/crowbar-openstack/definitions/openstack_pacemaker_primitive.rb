@@ -17,12 +17,12 @@
 define :openstack_pacemaker_primitive,
     agent: nil,
     parameters: {},
-    op: {},
+    op: nil,
     action: [] do
   primitive_name = params[:name]
   agent = params[:agent]
   parameters = params[:parameters]
-  op = params[:op]
+  op = params[:op] || {}
   action = params[:action]
 
   log "XXX #{op.inspect}"
